@@ -31,10 +31,9 @@
 define('DEBUG', true);
 define('PS_SHOP_PATH', 'http://www.myshop.com/');
 define('PS_WS_AUTH_KEY', 'ZQ88PRJX5VWQHCWE4EE7SQ7HPNX00RAJ');
-require_once('../PSWebServiceLibrary.php');
+require_once(__DIR__ . '/../PSWebServiceLibrary.php');
 
-if (isset($_GET['DeleteID']))
-{
+if (isset($_GET['DeleteID'])) {
     //Deletion
 
     echo '<h1>Customers Deletion</h1><br>';
@@ -42,58 +41,52 @@ if (isset($_GET['DeleteID']))
     // We set a link to go back to list
     echo '<a href="?">Return to the list</a>';
 
-    try
-    {
+    try {
         $webService = new PrestaShopWebservice(PS_SHOP_PATH, PS_WS_AUTH_KEY, DEBUG);
         // Call for a deletion, we specify the resource name and the id of the resource in order to delete the item
-        $webService->delete(array('resource' => 'customers', 'id' => intval($_GET['DeleteID'])));
+        $webService->delete(['resource' => 'customers', 'id' => (int) $_GET['DeleteID']]);
         // If there's an error we throw an exception
         echo 'Successfully deleted !<meta http-equiv="refresh" content="5"/>';
-    } catch (PrestaShopWebserviceNotFoundException $exception) {
+    } catch (PrestaShopWebserviceNotFoundException $prestaShopWebserviceNotFoundException) {
         echo 'Bad ID';
-    } catch (PrestaShopWebserviceUnauthorizedException $exception) {
+    } catch (PrestaShopWebserviceUnauthorizedException) {
         echo 'Bad auth key';
-    } catch (PrestaShopWebserviceForbiddenException $exception) {
+    } catch (PrestaShopWebserviceForbiddenException) {
         echo 'Not logged in';
-    } catch (PrestaShopWebserviceException $exception) {
-        echo 'Other error<br />'.$exception->getMessage();
+    } catch (PrestaShopWebserviceException $prestaShopWebserviceException) {
+        echo 'Other error<br />'.$prestaShopWebserviceException->getMessage();
     }
-}
-else
-{
+} else {
     // Else get customers list
-    try
-    {
+    try {
         $webService = new PrestaShopWebservice(PS_SHOP_PATH, PS_WS_AUTH_KEY, DEBUG);
-        $opt = array('resource' => 'customers');
+        $opt = ['resource' => 'customers'];
         $xml = $webService->get($opt);
         $resources = $xml->children()->children();
-    } catch (PrestaShopWebserviceNotFoundException $exception) {
+    } catch (PrestaShopWebserviceNotFoundException $prestaShopWebserviceNotFoundException) {
         echo 'Bad ID';
-    } catch (PrestaShopWebserviceUnauthorizedException $exception) {
+    } catch (PrestaShopWebserviceUnauthorizedException) {
         echo 'Bad auth key';
-    } catch (PrestaShopWebserviceForbiddenException $exception) {
+    } catch (PrestaShopWebserviceForbiddenException) {
         echo 'Not logged in';
-    } catch (PrestaShopWebserviceException $exception) {
-        echo 'Other error<br />'.$exception->getMessage();
+    } catch (PrestaShopWebserviceException $prestaShopWebserviceNotFoundException) {
+        echo 'Other error<br />'.$prestaShopWebserviceNotFoundException->getMessage();
     }
 
     echo '<h1>Customers List</h1>';
     echo '<table border="5">';
-    if (isset($resources))
-    {
+    if (isset($resources)) {
         echo '<tr>';
-        if (!isset($DeletionID))
-        {
+        if (!isset($DeletionID)) {
             echo '<th>Id</th><th>More</th></tr>';
 
-            foreach ($resources as $resource)
-            {
+            foreach ($resources as $resource) {
                 echo '<td>'.$resource->attributes().'</td><td>'.
                 '<a href="?DeleteID='.$resource->attributes().'">Delete</a>'.
                 '</td></tr>';
             }
         }
+
         echo '</table><br/>';
     }
 }

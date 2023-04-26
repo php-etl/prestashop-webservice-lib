@@ -31,29 +31,28 @@
 define('DEBUG', true);                                            // Debug mode
 define('PS_SHOP_PATH', 'http://www.myshop.com/');        // Root path of your PrestaShop store
 define('PS_WS_AUTH_KEY', 'ZQ88PRJX5VWQHCWE4EE7SQ7HPNX00RAJ');    // Auth key (Get it in your Back Office)
-require_once('../PSWebServiceLibrary.php');
+require_once(__DIR__ . '/../PSWebServiceLibrary.php');
 
 // Here we make the WebService Call
-try
-{
+try {
     $webService = new PrestaShopWebservice(PS_SHOP_PATH, PS_WS_AUTH_KEY, DEBUG);
-    
+
     // Here we set the option array for the Webservice : we want customers resources
     $opt['resource'] = 'customers';
-    
+
     // Call
     $xml = $webService->get($opt);
 
     // Here we get the elements from children of customers markup "customer"
     $resources = $xml->customers->children();
-} catch (PrestaShopWebserviceNotFoundException $exception) {
+} catch (PrestaShopWebserviceNotFoundException) {
     echo 'Bad ID';
-} catch (PrestaShopWebserviceUnauthorizedException $exception) {
+} catch (PrestaShopWebserviceUnauthorizedException) {
     echo 'Bad auth key';
-} catch (PrestaShopWebserviceForbiddenException $exception) {
+} catch (PrestaShopWebserviceForbiddenException) {
     echo 'Not logged in';
-} catch (PrestaShopWebserviceException $exception) {
-    echo 'Other error<br />'.$exception->getMessage();
+} catch (PrestaShopWebserviceException $prestaShopWebserviceException) {
+    echo 'Other error<br />'.$prestaShopWebserviceException->getMessage();
 }
 
 // We set the Title
@@ -61,15 +60,14 @@ echo "<h1>Customer's List</h1>";
 
 echo '<table border="5">';
 // if $resources is set we can lists element in it otherwise do nothing cause there's an error
-if (isset($resources))
-{
-        echo '<tr><th>Id</th></tr>';
-        foreach ($resources as $resource)
-        {
-            // Iterates on the found IDs
-            echo '<tr><td>'.$resource->attributes().'</td></tr>';
-        }
+if (isset($resources)) {
+    echo '<tr><th>Id</th></tr>';
+    foreach ($resources as $resource) {
+        // Iterates on the found IDs
+        echo '<tr><td>'.$resource->attributes().'</td></tr>';
+    }
 }
+
 echo '</table>';
 ?>
 </body></html>

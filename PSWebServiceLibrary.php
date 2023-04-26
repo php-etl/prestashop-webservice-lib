@@ -31,7 +31,6 @@
  */
 class PrestaShopWebservice
 {
-
     /** @var string Shop URL */
     protected $url;
 
@@ -45,9 +44,9 @@ class PrestaShopWebservice
     protected $version;
 
     /** @var string Minimal version of PrestaShop to use with this library */
-    const psCompatibleVersionsMin = '1.4.0.0';
+    public const psCompatibleVersionsMin = '1.4.0.0';
     /** @var string Maximal version of PrestaShop to use with this library */
-    const psCompatibleVersionsMax = '8.1.1';
+    public const psCompatibleVersionsMax = '8.1.1';
 
     /**
      * PrestaShopWebservice constructor. Throw an exception when CURL is not installed/activated
@@ -72,7 +71,7 @@ class PrestaShopWebservice
      *
      * @throws PrestaShopWebserviceException if curl is not loaded
      */
-    function __construct($url, $key, $debug = true)
+    public function __construct($url, $key, $debug = true)
     {
         if (!extension_loaded('curl')) {
             throw PrestaShopWebserviceMissingPreconditionException::missingExtension('curl');
@@ -229,7 +228,7 @@ class PrestaShopWebservice
             $index = strlen($response);
             $header = $response;
             $body = '';
-        } else if ($index === false) {
+        } elseif ($index === false) {
             throw PrestaShopWebserviceServerException::badResponseFormat(curl_error($session));
         } else {
             $header = substr($response, 0, $index);
@@ -582,7 +581,8 @@ interface PrestaShopWebserviceException extends \Throwable
 /**
  * @package PrestaShopWebservice
  */
-class PrestaShopWebserviceBadParametersException extends \RuntimeException implements PrestaShopWebserviceException {
+class PrestaShopWebserviceBadParametersException extends \RuntimeException implements PrestaShopWebserviceException
+{
     /**
      * @param ?\Throwable $previous
      * @return PrestaShopWebserviceBadParametersException
@@ -596,7 +596,8 @@ class PrestaShopWebserviceBadParametersException extends \RuntimeException imple
 /**
  * @package PrestaShopWebservice
  */
-class PrestaShopWebserviceMissingPreconditionException extends \BadFunctionCallException implements PrestaShopWebserviceException {
+class PrestaShopWebserviceMissingPreconditionException extends \BadFunctionCallException implements PrestaShopWebserviceException
+{
     /**
      * @param string $extension
      * @param ?\Throwable $previous
@@ -620,7 +621,8 @@ class PrestaShopWebserviceMissingPreconditionException extends \BadFunctionCallE
 /**
  * @package PrestaShopWebservice
  */
-class PrestaShopWebserviceBadRequestException extends \RuntimeException implements PrestaShopWebserviceException {
+class PrestaShopWebserviceBadRequestException extends \RuntimeException implements PrestaShopWebserviceException
+{
     /**
      * @param ?\Throwable $previous
      * @return self
@@ -634,7 +636,8 @@ class PrestaShopWebserviceBadRequestException extends \RuntimeException implemen
 /**
  * @package PrestaShopWebservice
  */
-class PrestaShopWebserviceUnauthorizedException extends \RuntimeException implements PrestaShopWebserviceException {
+class PrestaShopWebserviceUnauthorizedException extends \RuntimeException implements PrestaShopWebserviceException
+{
     /**
      * @param ?\Throwable $previous
      * @return self
@@ -648,7 +651,8 @@ class PrestaShopWebserviceUnauthorizedException extends \RuntimeException implem
 /**
  * @package PrestaShopWebservice
  */
-class PrestaShopWebserviceForbiddenException extends \RuntimeException implements PrestaShopWebserviceException {
+class PrestaShopWebserviceForbiddenException extends \RuntimeException implements PrestaShopWebserviceException
+{
     /**
      * @param ?\Throwable $previous
      * @return self
@@ -662,12 +666,13 @@ class PrestaShopWebserviceForbiddenException extends \RuntimeException implement
 /**
  * @package PrestaShopWebservice
  */
-class PrestaShopWebserviceNotFoundException extends \RuntimeException implements PrestaShopWebserviceException {
+class PrestaShopWebserviceNotFoundException extends \RuntimeException implements PrestaShopWebserviceException
+{
     /**
      * @param \Throwable $previous
      * @return self
      */
-    public  function __construct($previous = null)
+    public function __construct($previous = null)
     {
         parent::__construct('Not Found', 404, $previous);
     }
@@ -676,7 +681,8 @@ class PrestaShopWebserviceNotFoundException extends \RuntimeException implements
 /**
  * @package PrestaShopWebservice
  */
-class PrestaShopWebserviceMethodNotAllowedException extends \RuntimeException implements PrestaShopWebserviceException {
+class PrestaShopWebserviceMethodNotAllowedException extends \RuntimeException implements PrestaShopWebserviceException
+{
     /**
      * @param ?\Throwable $previous
      * @return self
@@ -690,7 +696,8 @@ class PrestaShopWebserviceMethodNotAllowedException extends \RuntimeException im
 /**
  * @package PrestaShopWebservice
  */
-class PrestaShopWebserviceTooManyRequestsException extends \RuntimeException implements PrestaShopWebserviceException {
+class PrestaShopWebserviceTooManyRequestsException extends \RuntimeException implements PrestaShopWebserviceException
+{
     /**
      * @param ?\Throwable $previous
      * @return self
@@ -704,7 +711,8 @@ class PrestaShopWebserviceTooManyRequestsException extends \RuntimeException imp
 /**
  * @package PrestaShopWebservice
  */
-class PrestaShopWebserviceNoContentException extends \RuntimeException implements PrestaShopWebserviceException {
+class PrestaShopWebserviceNoContentException extends \RuntimeException implements PrestaShopWebserviceException
+{
     /**
      * @param ?\Throwable $previous
      * @return self
@@ -718,7 +726,8 @@ class PrestaShopWebserviceNoContentException extends \RuntimeException implement
 /**
  * @package PrestaShopWebservice
  */
-class PrestaShopWebserviceStatusException extends \RuntimeException implements PrestaShopWebserviceException {
+class PrestaShopWebserviceStatusException extends \RuntimeException implements PrestaShopWebserviceException
+{
     /**
      * @param int $code
      * @param string $status
@@ -748,7 +757,7 @@ class PrestaShopWebserviceStatusException extends \RuntimeException implements P
     {
         return self::shouldNotReceiveStatus(100, 'Continue', $previous);
     }
-    
+
     /**
      * @param ?\Throwable $previous
      * @return self
@@ -757,7 +766,7 @@ class PrestaShopWebserviceStatusException extends \RuntimeException implements P
     {
         return self::shouldNotReceiveStatus(101, 'Switching Protocols', $previous);
     }
-    
+
     /**
      * @param ?\Throwable $previous
      * @return self
@@ -843,7 +852,8 @@ class PrestaShopWebserviceStatusException extends \RuntimeException implements P
 /**
  * @package PrestaShopWebservice
  */
-class PrestaShopWebserviceClientException extends \RuntimeException implements PrestaShopWebserviceException {
+class PrestaShopWebserviceClientException extends \RuntimeException implements PrestaShopWebserviceException
+{
     /**
      * @param int $statusCode
      * @param ?\Throwable $previous
@@ -876,7 +886,8 @@ class PrestaShopWebserviceClientException extends \RuntimeException implements P
 /**
  * @package PrestaShopWebservice
  */
-class PrestaShopWebserviceServerException extends \RuntimeException implements PrestaShopWebserviceException {
+class PrestaShopWebserviceServerException extends \RuntimeException implements PrestaShopWebserviceException
+{
     /**
      * @param int $statusCode
      * @param ?\Throwable $previous
