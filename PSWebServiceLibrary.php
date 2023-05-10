@@ -125,7 +125,7 @@ class PrestaShopWebservice
         $errors = $this->parseXML($request['response'])->children()->children();
         if ($errors && count($errors) > 0) {
             foreach ($errors as $error) {
-                $errorMessage.= $error->message . '. ';
+                $errorMessage.= $error->message . ' - ';
             }
         }
 
@@ -188,7 +188,7 @@ class PrestaShopWebservice
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
             CURLOPT_USERPWD => $this->key . ':',
             CURLOPT_HTTPHEADER => array('Expect:'),
-            //CURLOPT_SSL_VERIFYPEER => false, // reminder, in dev environment sometimes self-signed certificates are used
+            CURLOPT_SSL_VERIFYPEER => false, // reminder, in dev environment sometimes self-signed certificates are used
             //CURLOPT_CAINFO => "PATH2CAINFO", // ssl certificate chain checking
             //CURLOPT_CAPATH => "PATH2CAPATH",
         );
@@ -230,6 +230,9 @@ class PrestaShopWebservice
 
         curl_setopt_array($session, $curl_options);
         $response = curl_exec($session);
+        if (curl_errno($session)) {
+            throw new PrestaShopWebserviceClientException('cURL Error: ' . curl_error($session));
+        }
         if (!is_string($response)) {
             throw PrestaShopWebserviceClientException::curlRequestExecutionFailure();
         }
@@ -565,6 +568,67 @@ class PrestaShopWebservice
         return true;
     }
 
+    public function upload($options)
+    {
+        if (isset($options['resource'], $options['image'], $options['id']) || isset($options['url'], $options['image'])) {
+            $url = (isset($options['resource']) ? $this->url . '/api/' . $options['resource'] . '/' . $options['id'] : $options['url']);
+            $image = $options['image'];
+            if (isset($options['id_shop'])) {
+                $url .= '&id_shop=' . $options['id_shop'];
+            }
+            if (isset($options['id_group_shop'])) {
+                $url .= '&id_group_shop=' . $options['id_group_shop'];
+            }
+        } else {
+            throw PrestaShopWebserviceBadParametersException::badParameters();
+        }
+
+        $filesize = null;
+        $stats = fstat($image);
+        if (array_key_exists('size', $stats)) {
+            $filesize = $stats['size'];
+        }
+
+        echo 'url: '.$url.', filesize: '.$filesize.PHP_EOL;
+        echo 'mem: '.memory_get_usage(true).PHP_EOL;
+        if ($filesize > 3000000) {
+            throw new \PrestaShopWebserviceServerException('Image is too big');
+        }
+
+        $filename = null;
+        $options = stream_context_get_options($image);
+        if (array_key_exists('http', $options) && array_key_exists('filename', $options['http'])) {
+            $filename = $options['http']['filename'];
+        }
+
+        $formData = new \Symfony\Component\Mime\Part\Multipart\FormDataPart(array(
+            'image' => new \Symfony\Component\Mime\Part\DataPart($image, $filename),
+        ));
+
+        $headers = $formData->getPreparedHeaders()->toArray();
+        $headers[] = 'Content-Length: ' . $filesize;
+        $headers[] = 'Authorization: Basic ' . base64_encode($this->key . ':');
+
+        $client = \Symfony\Component\HttpClient\HttpClient::create();
+        $request = $client->request(
+            'POST',
+            $url,
+            array(
+                'headers' => $headers,
+                'body' => ['image' => $image],
+            )
+        );
+
+        sleep(2);
+        if ($request->getStatusCode() !== 200) {
+            $this->assertStatusCode(['status_code' => $request->getStatusCode(), 'response' => $request->getContent()]);
+        }
+        echo 'done!'.PHP_EOL;
+
+        preg_match('/<id><!\[CDATA\[(\d+)\]\]><\/id>/', $request->getContent(), $matches);
+
+        return ['image' => ['id' => $matches[1]]];
+    }
 }
 
 // Polyfill for PHP 5
@@ -759,7 +823,7 @@ class PrestaShopWebserviceStatusException extends \RuntimeException implements P
     {
         return self::shouldNotReceiveStatus(100, 'Continue', $previous);
     }
-    
+
     /**
      * @param ?\Throwable $previous
      * @return self
@@ -768,7 +832,7 @@ class PrestaShopWebserviceStatusException extends \RuntimeException implements P
     {
         return self::shouldNotReceiveStatus(101, 'Switching Protocols', $previous);
     }
-    
+
     /**
      * @param ?\Throwable $previous
      * @return self

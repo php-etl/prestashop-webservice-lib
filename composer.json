@@ -17,6 +17,8 @@
     "php": ">= 5.3.0",
     "ext-curl": "*",
     "ext-libxml": "*",
-    "ext-simplexml": "*"
+    "ext-simplexml": "*",
+    "symfony/http-client": "^6.3",
+    "symfony/mime": "^6.3"
   }
 }
